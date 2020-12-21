@@ -39,8 +39,25 @@ input.each do |i|
   end
 end
 
-ing_stat.each do |ing, val|
-  puts "#{ing}: #{val[:all].keys.select { |a| val[:all][a] == val[:total] }.join(', ')}"
+# Try to calculate which ingredient matches which allergen.
+# The idea is that any allergen would match at least one ingredient in terms
+# of total appearances number in the list.
+allergens_map = {}
+while allergens_map.keys.sort != all_stat.map { |a, _| a }.sort
+  all_stat.each do |a, v|
+    ing = v[:ing].keys.select { |k| !allergens_map.values.include?(k) && v[:ing][k] == v[:total] }
+    allergens_map[a] = ing.first if ing.count == 1
+  end
 end
 
-puts ing_stat
+# Answer #1
+puts ing_stat.keys
+             .select { |k| !allergens_map.values.include?(k) }
+             .map { |k| ing_stat[k][:total] }
+             .sum
+
+# Answer #2
+puts allergens_map.map { |a, i| [a, i] }
+                  .sort_by { |x| x[0] }
+                  .map { |x| x[1] }
+                  .join(',')
